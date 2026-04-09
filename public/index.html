@@ -221,7 +221,7 @@
       document.getElementById("exp-nombre").textContent =
         loginData.nombre + " " + loginData.apellidos;
       document.getElementById("exp-subtitulo").textContent =
-        loginData.usuario + "@usal.es · " + loginData.curso + "º curso · Ing. Informática";
+  expData.alumno.usuario + "@usal.es · " + expData.alumno.curso + "º curso · " + expData.alumno.carrera;
 
       // Notas
       const tbodyNotas = document.querySelector("#tabla-notas tbody");
