@@ -20,7 +20,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "tfg_usal_xK9mP2qL_2024";
 
 app.use(cors());
 app.use(express.json());
-
+app.use(express.static("public"));
 // ── Pool de conexiones MySQL ──────────────────────────────
 const pool = mysql.createPool({
   host:     process.env.DB_HOST || "mysql.railway.internal",
