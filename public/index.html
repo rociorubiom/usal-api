@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>idUSAL - Identidad digital</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, Helvetica, sans-serif; background: #f2f2f2; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .top-bar { background: #ffffff; border-bottom: 1px solid #ddd; padding: 14px 24px 10px; }
+    .top-bar .univ-name { font-family: 'Palatino Linotype', Palatino, serif; font-size: 22px; font-weight: bold; color: #444; letter-spacing: 1px; text-transform: uppercase; }
+    .top-bar .subtitle { margin-top: 2px; font-size: 15px; }
+    .top-bar .subtitle strong { color: #c0392b; font-weight: bold; }
+    .top-bar .subtitle em { font-style: normal; color: #555; }
+
+    .page-center { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
+
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 36px 32px 28px; width: 100%; max-width: 420px; }
+
+    .id-logo { font-size: 38px; font-weight: bold; margin-bottom: 28px; color: #555; letter-spacing: -1px; }
+    .id-logo span { color: #c0392b; font-style: italic; }
+
+    .field-group { margin-bottom: 18px; }
+    .field-group label { display: block; font-size: 14px; color: #333; margin-bottom: 5px; }
+    .input-wrapper { display: flex; align-items: center; }
+    .input-wrapper input { flex: 1; padding: 10px 12px; font-size: 14px; border: 1px solid #aaa; background: #dce8f5; color: #333; outline: none; border-radius: 2px; }
+    .input-wrapper input:focus { border-color: #3a7abf; background: #e8f0fb; }
+    .input-wrapper .domain { margin-left: 10px; font-size: 14px; color: #555; white-space: nowrap; }
+
+    .btn-aceptar { display: inline-block; margin-top: 6px; padding: 11px 28px; background: #c0392b; color: #fff; font-size: 13px; font-weight: bold; letter-spacing: 1px; border: none; border-radius: 3px; cursor: pointer; text-transform: uppercase; }
+    .btn-aceptar:hover { background: #a93226; }
+    .btn-aceptar:disabled { background: #aaa; cursor: not-allowed; }
+
+    .forgot { margin-top: 16px; font-size: 13px; }
+    .forgot a { color: #c0392b; text-decoration: none; cursor: pointer; }
+    .forgot a:hover { text-decoration: underline; }
+
+    .separator { border: none; border-top: 1px solid #ccc; margin: 22px 0 18px; }
+
+    .other-auth p { font-size: 13px; color: #555; margin-bottom: 16px; }
+    .auth-logos { display: flex; align-items: center; gap: 40px; }
+    .clave-logo { font-size: 22px; font-weight: 300; color: #333; letter-spacing: -0.5px; cursor: pointer; }
+    .clave-logo .at { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border: 2.5px solid #333; border-radius: 50%; font-size: 14px; font-weight: bold; color: #333; margin: 0 1px; }
+    .sir2-logo { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .sir2-arrow { width: 36px; height: 18px; }
+    .sir2-text { font-size: 20px; font-weight: bold; color: #3a7abf; }
+
+    .error-msg { background: #fdecea; border: 1px solid #f5c6c6; border-radius: 3px; padding: 9px 12px; font-size: 13px; color: #922b21; margin-bottom: 14px; display: none; }
+
+    /* ── Panel de expediente ── */
+    .expediente { display: none; }
+    .exp-header { margin-bottom: 20px; }
+    .exp-header h2 { font-size: 17px; color: #003057; margin-bottom: 2px; }
+    .exp-header p  { font-size: 13px; color: #666; }
+
+    .exp-section-title { font-size: 13px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #003057; border-bottom: 2px solid #c0392b; padding-bottom: 4px; margin: 18px 0 10px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #003057; color: #fff; padding: 7px 8px; text-align: left; font-weight: normal; }
+    td { padding: 6px 8px; border-bottom: 1px solid #eee; color: #333; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f5f8ff; }
+
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-weight: bold; }
+    .badge-NP { background: #eee;    color: #666; }
+    .badge-SS { background: #fdecea; color: #922b21; }
+    .badge-AP { background: #fff8e1; color: #7b5e00; }
+    .badge-NT { background: #e3f2fd; color: #1565c0; }
+    .badge-SB { background: #e8f5e9; color: #2e7d32; }
+    .badge-MH { background: #f3e5f5; color: #6a1b9a; }
+
+    .btn-logout { margin-top: 20px; padding: 8px 18px; background: #003057; color: #fff; font-size: 12px; border: none; border-radius: 3px; cursor: pointer; }
+    .btn-logout:hover { background: #004b87; }
+
+    .footer { text-align: center; font-size: 11px; color: #999; padding: 12px; background: #fff; border-top: 1px solid #eee; }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="univ-name"><span>Vniversidad</span> <span>d</span> <span>Salamanca</span></div>
+    <div class="subtitle"><strong>idUSAL</strong> <em>- Identidad digital</em></div>
+  </div>
+
+  <div class="page-center">
+    <div class="card">
+      <div class="id-logo"><span>id</span>VSAL</div>
+      <div class="error-msg" id="error-box"></div>
+
+      <!-- ── Formulario de login ── -->
+      <div id="login-form">
+        <div class="field-group">
+          <label for="usuario">Usuario</label>
+          <div class="input-wrapper">
+            <input type="text" id="usuario" placeholder="nombre.apellido" autocomplete="username" />
+            <span class="domain">@usal.es</span>
+          </div>
+        </div>
+        <div class="field-group">
+          <label for="password">Contraseña</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" autocomplete="current-password" />
+          </div>
+        </div>
+        <button class="btn-aceptar" id="login-btn" onclick="handleLogin()">Aceptar</button>
+        <div class="forgot">
+          <span>🔑</span>
+          <a onclick="mostrarOlvide()">Contraseña olvidada</a>
+        </div>
+        <hr class="separator" />
+        <div class="other-auth">
+          <p>Otros sistemas de autenticación</p>
+          <div class="auth-logos">
+            <div class="clave-logo">cl<span class="at">@</span>ve</div>
+            <div class="sir2-logo">
+              <svg class="sir2-arrow" viewBox="0 0 36 18" fill="none">
+                <polygon points="0,9 20,0 20,6 36,6 36,12 20,12 20,18" fill="#3a7abf"/>
+              </svg>
+              <span class="sir2-text">SIR2</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Expediente académico ── -->
+      <div class="expediente" id="expediente">
+        <div class="exp-header">
+          <h2 id="exp-nombre"></h2>
+          <p id="exp-subtitulo"></p>
+        </div>
+
+        <div class="exp-section-title">Notas</div>
+        <table id="tabla-notas">
+          <thead>
+            <tr><th>Asignatura</th><th>Cr.</th><th>Conv.</th><th>Nota</th><th>Cal.</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="exp-section-title">Próximas convocatorias</div>
+        <table id="tabla-conv">
+          <thead>
+            <tr><th>Asignatura</th><th>Tipo</th><th>Fecha</th><th>Hora</th><th>Aula</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    Servicio de Informática y Comunicaciones · Universidad de Salamanca · 37007 Salamanca
+  </div>
+
+  <script>
+    // ── CONFIGURACIÓN ─────────────────────────────────────
+    // Cambia esta URL por la de tu servidor Node cuando lo despliegues
+    const API_URL = "https://usal-api-production.up.railway.app/api";
+
+    // ─────────────────────────────────────────────────────
+    async function handleLogin() {
+      const usuario  = document.getElementById("usuario").value.trim();
+      const password = document.getElementById("password").value;
+      const btn      = document.getElementById("login-btn");
+      const errBox   = document.getElementById("error-box");
+
+      errBox.style.display = "none";
+      if (!usuario || !password) {
+        mostrarError("Debes introducir tu usuario y contraseña.");
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = "Verificando...";
+
+      try {
+        // 1. Login → obtener token JWT
+        const resLogin = await fetch(API_URL + "/login", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ usuario, password })
+        });
+        const dataLogin = await resLogin.json();
+
+        if (!resLogin.ok) {
+          mostrarError(dataLogin.error || "Error al iniciar sesión.");
+          btn.disabled    = false;
+          btn.textContent = "Aceptar";
+          return;
+        }
+
+        const token = dataLogin.token;
+
+        // 2. Con el token, pedir el expediente completo
+        const resExp = await fetch(API_URL + "/expediente", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        const dataExp = await resExp.json();
+
+        // 3. Mostrar los datos en pantalla
+        mostrarExpediente(dataLogin, dataExp);
+
+        // 4. Notificar al juego (Unreal / iframe padre)
+        notificarJuego(token, dataLogin, dataExp);
+
+      } catch (err) {
+        mostrarError("No se pudo conectar con el servidor. ¿Está arrancado Node.js?");
+        btn.disabled    = false;
+        btn.textContent = "Aceptar";
+      }
+    }
+
+    function mostrarExpediente(loginData, expData) {
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("expediente").style.display  = "block";
+
+      document.getElementById("exp-nombre").textContent =
+        loginData.nombre + " " + loginData.apellidos;
+      document.getElementById("exp-subtitulo").textContent =
+        loginData.usuario + "@usal.es · " + loginData.curso + "º curso · Ing. Informática";
+
+      // Notas
+      const tbodyNotas = document.querySelector("#tabla-notas tbody");
+      tbodyNotas.innerHTML = "";
+      expData.notas.forEach(function(n) {
+        const cal   = n.calificacion || "NP";
+        const nota  = n.nota !== null ? parseFloat(n.nota).toFixed(2) : "—";
+        tbodyNotas.innerHTML += `
+          <tr>
+            <td>${n.asignatura}</td>
+            <td>${n.creditos}</td>
+            <td>${n.convocatoria}</td>
+            <td>${nota}</td>
+            <td><span class="badge badge-${cal}">${cal}</span></td>
+          </tr>`;
+      });
+
+      // Convocatorias
+      const tbodyConv = document.querySelector("#tabla-conv tbody");
+      tbodyConv.innerHTML = "";
+      if (expData.convocatorias.length === 0) {
+        tbodyConv.innerHTML = '<tr><td colspan="5" style="color:#999;text-align:center">No hay convocatorias próximas</td></tr>';
+      } else {
+        expData.convocatorias.forEach(function(c) {
+          tbodyConv.innerHTML += `
+            <tr>
+              <td>${c.asignatura}</td>
+              <td>${c.tipo}</td>
+              <td>${c.fecha}</td>
+              <td>${c.hora_inicio}–${c.hora_fin}</td>
+              <td>${c.aula}</td>
+            </tr>`;
+        });
+      }
+    }
+
+    // ── Comunicación con Unreal / juego padre ─────────────
+    function notificarJuego(token, loginData, expData) {
+      const payload = {
+        tipo:          "loginUSAL",
+        token,
+        usuario:       loginData.usuario,
+        nombre:        loginData.nombre + " " + loginData.apellidos,
+        curso:         loginData.curso,
+        notas:         expData.notas,
+        convocatorias: expData.convocatorias
+      };
+
+      // Opción A: postMessage (para HTML5 / iframe)
+      window.parent.postMessage(payload, "*");
+
+      // Opción B: Unreal WebBrowser widget binding
+      // if (window.ue && window.ue.usalinterface) {
+      //   window.ue.usalinterface.ondatosrecibidos(JSON.stringify(payload));
+      // }
+    }
+
+    function cerrarSesion() {
+      document.getElementById("expediente").style.display  = "none";
+      document.getElementById("login-form").style.display  = "block";
+      document.getElementById("usuario").value  = "";
+      document.getElementById("password").value = "";
+      document.getElementById("login-btn").disabled    = false;
+      document.getElementById("login-btn").textContent = "Aceptar";
+    }
+
+    function mostrarError(msg) {
+      const e = document.getElementById("error-box");
+      e.textContent    = msg;
+      e.style.display  = "block";
+    }
+
+    function mostrarOlvide() {
+      mostrarError("Recupera tu contraseña en: identidad.usal.es/recuperar");
+    }
+
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") handleLogin();
+    });
+  </script>
+
+</body>
+</html>
