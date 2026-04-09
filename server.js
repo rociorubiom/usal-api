@@ -1,35 +1,33 @@
 // ============================================================
 //  API USAL · Node.js + Express + MySQL
 //  TFG · Ingeniería Informática
+//  Configurado para Railway
 //
-//  INSTALACIÓN:
-//    npm install express mysql2 bcrypt jsonwebtoken cors dotenv
-//
-//  ARRANQUE:
+//  INSTALACIÓN LOCAL:
+//    npm install express mysql2 jsonwebtoken cors dotenv
 //    node server.js
-//    (o con nodemon: npx nodemon server.js)
 // ============================================================
 
 require("dotenv").config();
-const express    = require("express");
-const mysql      = require("mysql2/promise");
-const bcrypt     = require("bcrypt");
-const jwt        = require("jsonwebtoken");
-const cors       = require("cors");
+const express = require("express");
+const mysql   = require("mysql2/promise");
+const jwt     = require("jsonwebtoken");
+const cors    = require("cors");
 
-const app  = express();
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "clave_secreta_tfg_usal_2024";
+const app        = express();
+const PORT       = process.env.PORT       || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || "tfg_usal_xK9mP2qL_2024";
 
 app.use(cors());
 app.use(express.json());
 
 // ── Pool de conexiones MySQL ──────────────────────────────
 const pool = mysql.createPool({
-  host:     process.env.DB_HOST     || "localhost",
-  user:     process.env.DB_USER     || "root",
-  password: process.env.DB_PASS     || "",
-  database: process.env.DB_NAME     || "usal_juego",
+  host:     process.env.DB_HOST || "mysql.railway.internal",
+  port:     process.env.DB_PORT || 3306,
+  user:     process.env.DB_USER || "root",
+  password: process.env.DB_PASS || "WUIEVyajDrxQHIfyMJCeHYYPSVdmPaGp",
+  database: process.env.DB_NAME || "railway",
   waitForConnections: true,
   connectionLimit: 10
 });
@@ -52,6 +50,11 @@ function authMiddleware(req, res, next) {
 //  RUTAS
 // ============================================================
 
+// ── GET /  →  health check ────────────────────────────────
+app.get("/", (req, res) => {
+  res.json({ ok: true, mensaje: "API USAL funcionando correctamente" });
+});
+
 // ── POST /api/login ───────────────────────────────────────
 // Body: { usuario, password }
 // Devuelve: { token, nombre, apellidos, curso }
@@ -71,11 +74,8 @@ app.post("/api/login", async (req, res) => {
 
     const alumno = rows[0];
 
-    // Para pruebas rápidas sin bcrypt real puedes comparar en plano:
-    // const match = password === alumno.password;
-    const match = await bcrypt.compare(password, alumno.password);
-
-    if (!match)
+    // Comparación en texto plano (para el TFG)
+    if (password !== alumno.password)
       return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
 
     const token = jwt.sign(
@@ -85,7 +85,7 @@ app.post("/api/login", async (req, res) => {
     );
 
     res.json({
-      ok: true,
+      ok:        true,
       token,
       nombre:    alumno.nombre,
       apellidos: alumno.apellidos,
@@ -99,8 +99,6 @@ app.post("/api/login", async (req, res) => {
 });
 
 // ── GET /api/notas ────────────────────────────────────────
-// Devuelve todas las notas del alumno autenticado
-// Headers: Authorization: Bearer <token>
 app.get("/api/notas", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(`
@@ -128,14 +126,12 @@ app.get("/api/notas", authMiddleware, async (req, res) => {
 });
 
 // ── GET /api/convocatorias ────────────────────────────────
-// Devuelve los próximos exámenes del alumno autenticado
-// (solo asignaturas en las que el alumno tiene nota registrada o aún no aprobó)
 app.get("/api/convocatorias", authMiddleware, async (req, res) => {
   try {
     const [rows] = await pool.query(`
       SELECT
         a.codigo,
-        a.nombre        AS asignatura,
+        a.nombre      AS asignatura,
         a.creditos,
         c.tipo,
         c.fecha,
@@ -158,16 +154,14 @@ app.get("/api/convocatorias", authMiddleware, async (req, res) => {
 });
 
 // ── GET /api/expediente ───────────────────────────────────
-// Resumen completo: datos del alumno + notas + convocatorias
+// Devuelve todo: alumno + notas + convocatorias en una sola llamada
 app.get("/api/expediente", authMiddleware, async (req, res) => {
   try {
-    // Datos del alumno
     const [[alumno]] = await pool.query(
       "SELECT nombre, apellidos, usuario, curso FROM alumnos WHERE id = ?",
       [req.alumno.id]
     );
 
-    // Notas
     const [notas] = await pool.query(`
       SELECT
         a.codigo, a.nombre AS asignatura, a.curso, a.cuatrimestre, a.creditos,
@@ -178,7 +172,6 @@ app.get("/api/expediente", authMiddleware, async (req, res) => {
       ORDER BY a.curso, a.cuatrimestre, a.nombre
     `, [req.alumno.id]);
 
-    // Convocatorias próximas
     const [convocatorias] = await pool.query(`
       SELECT
         a.codigo, a.nombre AS asignatura,
@@ -199,5 +192,5 @@ app.get("/api/expediente", authMiddleware, async (req, res) => {
 
 // ── Arranque ──────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`✅  API USAL corriendo en http://localhost:${PORT}`);
+  console.log(`API USAL corriendo en http://localhost:${PORT}`);
 });
