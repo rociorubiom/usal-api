@@ -157,27 +157,29 @@ app.get("/api/convocatorias", authMiddleware, async (req, res) => {
 // Devuelve todo: alumno + notas + convocatorias en una sola llamada
 app.get("/api/expediente", authMiddleware, async (req, res) => {
   try {
-    const [[alumno]] = await pool.query(
-      "SELECT nombre, apellidos, usuario, curso FROM alumnos WHERE id = ?",
-      [req.alumno.id]
-    );
+    const [[alumno]] = await pool.query(`
+      SELECT a.nombre, a.apellidos, a.usuario, a.curso, c.nombre AS carrera
+      FROM alumnos a
+      JOIN carreras c ON c.id = a.carrera_id
+      WHERE a.id = ?
+    `, [req.alumno.id]);
 
     const [notas] = await pool.query(`
       SELECT
-        a.codigo, a.nombre AS asignatura, a.curso, a.cuatrimestre, a.creditos,
+        as2.codigo, as2.nombre AS asignatura, as2.curso, as2.cuatrimestre, as2.creditos,
         n.convocatoria, n.nota, n.calificacion
       FROM notas n
-      JOIN asignaturas a ON a.id = n.asignatura_id
+      JOIN asignaturas as2 ON as2.id = n.asignatura_id
       WHERE n.alumno_id = ?
-      ORDER BY a.curso, a.cuatrimestre, a.nombre
+      ORDER BY as2.curso, as2.cuatrimestre, as2.nombre
     `, [req.alumno.id]);
 
     const [convocatorias] = await pool.query(`
       SELECT
-        a.codigo, a.nombre AS asignatura,
+        as2.codigo, as2.nombre AS asignatura,
         c.tipo, c.fecha, c.hora_inicio, c.hora_fin, c.aula, c.sede
       FROM convocatorias c
-      JOIN asignaturas a ON a.id = c.asignatura_id
+      JOIN asignaturas as2 ON as2.id = c.asignatura_id
       WHERE c.fecha >= CURDATE()
       ORDER BY c.fecha
     `);
