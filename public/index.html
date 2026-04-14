@@ -260,28 +260,23 @@
     }
 
     // ── Comunicación con Unreal / juego padre ─────────────
-   function notificarJuego(token, loginData, expData) {
+  function notificarJuego(token, loginData, expData) {
   const payload = {
+    tipo: "loginUSAL",
     token,
+    usuario: loginData.usuario,
     nombre: loginData.nombre + " " + loginData.apellidos,
-    notas: expData.notas,
+    notas: expData.notas, // Aquí van las notas que queremos mostrar
     convocatorias: expData.convocatorias
   };
 
-  // Manda los datos a Unreal
-  if (window.ue && window.ue.interface) {
-    window.ue.interface.datosrecibidos(JSON.stringify(payload));
+  //  Unreal reciba los datos
+  if (window.ue && window.ue.usalinterface) {
+    window.ue.usalinterface.ondatosrecibidos(JSON.stringify(payload));
   }
 }
 
-      // Opción A: postMessage (para HTML5 / iframe)
-      window.parent.postMessage(payload, "*");
-
-      // Opción B: Unreal WebBrowser widget binding
-      // if (window.ue && window.ue.usalinterface) {
-      //   window.ue.usalinterface.ondatosrecibidos(JSON.stringify(payload));
-      // }
-    }
+  
 
     function cerrarSesion() {
       document.getElementById("expediente").style.display  = "none";
