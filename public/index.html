@@ -260,16 +260,19 @@
     }
 
     // ── Comunicación con Unreal / juego padre ─────────────
-    function notificarJuego(token, loginData, expData) {
-      const payload = {
-        tipo:          "loginUSAL",
-        token,
-        usuario:       loginData.usuario,
-        nombre:        loginData.nombre + " " + loginData.apellidos,
-        curso:         loginData.curso,
-        notas:         expData.notas,
-        convocatorias: expData.convocatorias
-      };
+   function notificarJuego(token, loginData, expData) {
+  const payload = {
+    token,
+    nombre: loginData.nombre + " " + loginData.apellidos,
+    notas: expData.notas,
+    convocatorias: expData.convocatorias
+  };
+
+  // Manda los datos a Unreal
+  if (window.ue && window.ue.interface) {
+    window.ue.interface.datosrecibidos(JSON.stringify(payload));
+  }
+}
 
       // Opción A: postMessage (para HTML5 / iframe)
       window.parent.postMessage(payload, "*");
