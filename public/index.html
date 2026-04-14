@@ -215,6 +215,7 @@
     }
 
     function mostrarExpediente(loginData, expData) {
+      window.location.hash = "expediente";
       document.getElementById("login-form").style.display = "none";
       document.getElementById("expediente").style.display  = "block";
 
@@ -302,6 +303,5 @@
       if (e.key === "Enter") handleLogin();
     });
   </script>
-window.location.hash = "expediente";
 </body>
 </html>
