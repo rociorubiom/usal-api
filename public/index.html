@@ -215,14 +215,14 @@
     }
 
     function mostrarExpediente(loginData, expData) {
-window.location.href = "/juego?t=" + token;
+      window.location.href = "/juego";
       document.getElementById("login-form").style.display = "none";
       document.getElementById("expediente").style.display  = "block";
 
       document.getElementById("exp-nombre").textContent =
         loginData.nombre + " " + loginData.apellidos;
       document.getElementById("exp-subtitulo").textContent =
-  expData.alumno.usuario + "@usal.es · " + expData.alumno.curso + "º curso · " + expData.alumno.carrera;
+        loginData.usuario + "@usal.es · " + loginData.curso + "º curso · Ing. Informática";
 
       // Notas
       const tbodyNotas = document.querySelector("#tabla-notas tbody");
@@ -303,5 +303,6 @@ window.location.href = "/juego?t=" + token;
       if (e.key === "Enter") handleLogin();
     });
   </script>
+
 </body>
 </html>
