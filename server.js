@@ -191,7 +191,9 @@ app.get("/api/expediente", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Error del servidor" });
   }
 });
-
+app.get("/juego", (req, res) => {
+  res.send("<!DOCTYPE html><html><body>juego</body></html>");
+});
 // ── Arranque ──────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`API USAL corriendo en http://localhost:${PORT}`);
