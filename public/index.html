@@ -159,7 +159,8 @@
   <script>
     // ── CONFIGURACIÓN ─────────────────────────────────────
     // Cambia esta URL por la de tu servidor Node cuando lo despliegues
-    const API_URL = "https://usal-api-production.up.railway.app/api";
+    const API_URL   = "https://usal-api-production.up.railway.app/api";
+    const JUEGO_URL = "https://usal-api-production.up.railway.app/juego";
 
     // ─────────────────────────────────────────────────────
     async function handleLogin() {
@@ -215,7 +216,16 @@
     }
 
     function mostrarExpediente(loginData, expData) {
-      window.location.href = "/juego";
+      // Guardamos todo en sessionStorage para que /juego lo lea
+      sessionStorage.setItem("usal_alumno", JSON.stringify({
+        nombre:        loginData.nombre,
+        apellidos:     loginData.apellidos,
+        usuario:       loginData.usuario,
+        curso:         loginData.curso,
+        notas:         expData.notas,
+        convocatorias: expData.convocatorias
+      }));
+      window.location.href = JUEGO_URL;
       document.getElementById("login-form").style.display = "none";
       document.getElementById("expediente").style.display  = "block";
 
